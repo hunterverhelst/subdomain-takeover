@@ -5,6 +5,13 @@ freeirc.io:53 {
     log
     errors
 }
+freeirc.com:53 {
+    file /root/freeirc-com.db {
+        reload "10s"
+    }
+    log
+    errors
+}
 
 artstailor.com:53 {
     file /root/artstailor.db {

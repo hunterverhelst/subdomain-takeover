@@ -17,19 +17,19 @@ const Dashboard = (props: any) => {
     const [newPrefix, setNewPrefix] = useState("")
     const [showToast, setShowToast] = useState(false)
     useEffect(() => {
-        fetch('http://localhost:3080/domainprefix', {
+        fetch('/api/domainprefix', {
             method: "GET",
             headers: {
                 'jwt-token': props.user.token
             }
-        }).then((res) => res.json()).then((res:any) => {setDomainPrefix(res.prefix); setNewPrefix(res.prefix)})
+        }).then((res) => res.json()).then((res: any) => { setDomainPrefix(res.prefix); setNewPrefix(res.prefix) })
     }, [])
 
-    
-    const handleChangePrefixClick = (e:React.FormEvent<HTMLFormElement>) => {
+
+    const handleChangePrefixClick = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         if (e.currentTarget.checkValidity()) {
-        fetch('http://localhost:3080/domainprefix', {
+            fetch('/api/domainprefix', {
                 method: "POST",
                 headers: {
                     'jwt-token': props.user.token,
@@ -53,26 +53,26 @@ const Dashboard = (props: any) => {
 
     return (
         <>
-        <Navbar expand="lg" className="bg-body-tertiary">
-        <Container>
-            <Navbar.Brand href="">Free IRC</Navbar.Brand>
-            <Navbar.Toggle aria-controls="basic-navbar-nav" />
-            <Navbar.Collapse id="basic-navbar-nav">
-            <Nav className="me-auto">
-                <Nav.Link onClick={logOut}>Log Out</Nav.Link>
-            </Nav>
-            </Navbar.Collapse>
-        </Container>
-        </Navbar>
-        <h1>Manage Your FreeIRC Server</h1>
-        <h2>Try It Out!</h2>
-        <p>Your FreeIRC server is hosted at {domainPrefix}.freeirc.io</p>
-        <h2>Change your FreeIRC Domain</h2>
-        <Form onSubmit={handleChangePrefixClick}>
-            <Form.Control required type="text" name="newPrefix" placeholder={domainPrefix} onChange={e => setNewPrefix(e.target.value)}></Form.Control>
-            <Button type='submit' variant='primary'>Save</Button>
-        </Form>
-        <ChangeDomainToast show={{show: showToast, setShow: setShowToast}}></ChangeDomainToast>
+            <Navbar expand="lg" className="bg-body-tertiary">
+                <Container>
+                    <Navbar.Brand href="">Free IRC</Navbar.Brand>
+                    <Navbar.Toggle aria-controls="basic-navbar-nav" />
+                    <Navbar.Collapse id="basic-navbar-nav">
+                        <Nav className="me-auto">
+                            <Nav.Link onClick={logOut}>Log Out</Nav.Link>
+                        </Nav>
+                    </Navbar.Collapse>
+                </Container>
+            </Navbar>
+            <h1>Manage Your FreeIRC Server</h1>
+            <h2>Try It Out!</h2>
+            <p>Your FreeIRC server is hosted at {domainPrefix}.freeirc.io</p>
+            <h2>Change your FreeIRC Domain</h2>
+            <Form onSubmit={handleChangePrefixClick}>
+                <Form.Control required type="text" name="newPrefix" placeholder={domainPrefix} onChange={e => setNewPrefix(e.target.value)}></Form.Control>
+                <Button type='submit' variant='primary'>Save</Button>
+            </Form>
+            <ChangeDomainToast show={{ show: showToast, setShow: setShowToast }}></ChangeDomainToast>
         </>
     );
 }

@@ -31,21 +31,24 @@ export const startServer = (accountName: string) => {
 export const restartServer = (accountName: string) => {
     stopServer(accountName);
     startServer(accountName);
-    
+
 }
 
 const dbFile = '/root/dns/freeirc.db'
 
 export const updateDNS = (oldSubdomain: string, newSubdomain: string) => {
+    var date = new Date();
+    var dateStr = date.toISOString().slice(0, 10).replace(/-/g, "") + date.getSeconds().toString();
+    var dateNum = parseInt(dateStr)
+    console.log(dateStr)
     const zoneStr = fs.readFileSync(dbFile).toString()
     let zoneJson = zonefile.parse(zoneStr)
     zoneJson.a.forEach(x => {
-        if (x.name===oldSubdomain) {
+        if (x.name === oldSubdomain) {
             x.name = newSubdomain
         }
     })
-    let date = new Date();
-    let dateNum = date.getTime()
+
     zoneJson.soa.serial = dateNum
     const newZoneStr = zonefile.generate(zoneJson);
     fs.writeFileSync(dbFile, newZoneStr)

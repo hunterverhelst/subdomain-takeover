@@ -47,50 +47,50 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Basic home route for the API
-app.get("/", (_req, res) => {
-    res.send("Auth API.\nPlease use POST /auth & POST /verify for authentication")
+app.get("/api", (_req, res) => {
+  res.send("Auth API.\nPlease use POST /auth & POST /verify for authentication")
 })
 
 // The auth endpoint that creates a new user record or logs a user based on an existing record
-app.post("/auth", (req, res) => {
-    
-    const { email, password } = req.body;
+app.post("/api/auth", (req, res) => {
 
-    // Look up the user entry in the database
-    const user = db.chain.get("users").value().filter(user => email === user.email)
+  const { email, password } = req.body;
 
-    // If found, compare the hashed passwords and generate the JWT token for the user
-    if (user.length === 1) {
-        bcrypt.compare(password, user[0].password, function (_err, result) {
-            if (!result) {
-                return res.status(401).json({ message: "Invalid password" });
-            } else {
-                let loginData = {
-                    email,
-                    signInTime: Date.now(),
-                };
+  // Look up the user entry in the database
+  const user = db.chain.get("users").value().filter(user => email === user.email)
 
-                const token = jwt.sign(loginData, jwtSecretKey);
-                res.status(200).json({ message: "success", token });
-            }
-        });
+  // If found, compare the hashed passwords and generate the JWT token for the user
+  if (user.length === 1) {
+    bcrypt.compare(password, user[0].password, function (_err, result) {
+      if (!result) {
+        return res.status(401).json({ message: "Invalid password" });
+      } else {
+        let loginData = {
+          email,
+          signInTime: Date.now(),
+        };
+
+        const token = jwt.sign(loginData, jwtSecretKey);
+        res.status(200).json({ message: "success", token });
+      }
+    });
     // If no user is found, hash the given password and create a new entry in the auth db with the email and hashed password
-    } else if (user.length === 0) {
-        bcrypt.hash(password, 10, async function (_err, hash) {
-            console.log({ email, password: hash })
-            db.chain.get("users").push({ email, password: hash, prefix: email }).value()
-            await db.write()
+  } else if (user.length === 0) {
+    bcrypt.hash(password, 10, async function (_err, hash) {
+      console.log({ email, password: hash })
+      db.chain.get("users").push({ email, password: hash, prefix: email }).value()
+      await db.write()
 
-            let loginData = {
-                email,
-                signInTime: Date.now(),
-            };
+      let loginData = {
+        email,
+        signInTime: Date.now(),
+      };
 
-            const token = jwt.sign(loginData, jwtSecretKey);
-            res.status(200).json({ message: "success", token });
-        });
+      const token = jwt.sign(loginData, jwtSecretKey);
+      res.status(200).json({ message: "success", token });
+    });
 
-    }
+  }
 
 
 })
@@ -99,55 +99,55 @@ const checkToken = (req: any) => {
   //console.log(req)
   const tokenHeaderKey = "jwt-token";
   const authToken = req.headers[tokenHeaderKey];
-    try {
-      const verified = jwt.verify(authToken, jwtSecretKey);
-      if (verified) {
-        return verified;
-      } else {
-        // Access Denied
-        return null;
-      }
-    } catch (error) {
+  try {
+    const verified = jwt.verify(authToken, jwtSecretKey);
+    if (verified) {
+      return verified;
+    } else {
       // Access Denied
       return null;
     }
+  } catch (error) {
+    // Access Denied
+    return null;
+  }
 
 }
 // The verify endpoint that checks if a given JWT token is valid
-app.post('/verify', (req, res) => {
-    try {
-      const verified = checkToken(req)
-      if (verified !== null) {
-        return res
-          .status(200)
-          .json({ status: "logged in", message: "success" });
-      } else {
-        // Access Denied
-        return res.status(401).json({ status: "invalid auth", message: "error" });
-      }
-    } catch (error) {
+app.post('/api/verify', (req, res) => {
+  try {
+    const verified = checkToken(req)
+    if (verified !== null) {
+      return res
+        .status(200)
+        .json({ status: "logged in", message: "success" });
+    } else {
       // Access Denied
-      console.log(error)
       return res.status(401).json({ status: "invalid auth", message: "error" });
     }
+  } catch (error) {
+    // Access Denied
+    console.log(error)
+    return res.status(401).json({ status: "invalid auth", message: "error" });
+  }
 
 })
 
 // An endpoint to see if there's an existing account for a given email address
-app.post('/check-account', (req, res) => {
-    const { email } = req.body
+app.post('/api/check-account', (req, res) => {
+  const { email } = req.body
 
-    console.log(req.body)
+  console.log(req.body)
 
-    const user = db.chain.get("users").value().filter(user => email === user.email)
+  const user = db.chain.get("users").value().filter(user => email === user.email)
 
-    console.log(user)
-    
-    res.status(200).json({
-        status: user.length === 1 ? "User exists" : "User does not exist", userExists: user.length === 1
-    })
+  console.log(user)
+
+  res.status(200).json({
+    status: user.length === 1 ? "User exists" : "User does not exist", userExists: user.length === 1
+  })
 })
-app.get('/domainprefix', (req, res) => {
+app.get('/api/domainprefix', (req, res) => {
   console.log("get prefix")
   const userData = checkToken(req);
   if (userData === null) {
@@ -157,16 +157,16 @@ app.get('/domainprefix', (req, res) => {
 
   const user = db.chain.get("users").value().filter(user => userData.email === user.email)[0]
   console.log(user)
-  res.status(200).json({prefix: user.prefix})
+  res.status(200).json({ prefix: user.prefix })
 })
-app.post('/domainprefix', (req, res) => {
+app.post('/api/domainprefix', (req, res) => {
   const userData = checkToken(req);
   if (userData === null) {
     res.sendStatus(401);
     return
   }
-  if (req.body.prefix in ["dns", "www", ]) {
-    res.status(401).json({message: "subdomain is either reserved or taken"})
+  if (req.body.prefix in ["dns", "www",]) {
+    res.status(401).json({ message: "subdomain is either reserved or taken" })
   }
   const user = db.chain.get("users").value().filter(user => userData.email === user.email)[0]
   let oldPrefix = user.prefix
@@ -190,7 +190,7 @@ app.post('/domainprefix', (req, res) => {
 //   res.sendStatus(200)
 // })
 
-app.post('/server/restart', (req, res) => {
+app.post('/api/server/restart', (req, res) => {
   const userData = checkToken(req)
   if (userData === null) {
     res.sendStatus(401);
