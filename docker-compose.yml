@@ -1,0 +1,86 @@
+version: "3.8"
+
+services:
+
+  dns:
+    image: coredns/coredns
+    command: -conf /root/Corefile
+    volumes:
+      - ./dns/config/:/root
+    networks:
+        internal-net:
+            ipv4_address: "192.168.0.53"
+  freeirc-com:
+    build: ./web/
+    ports:
+        - "127.0.0.1:80:80"
+        - "127.0.0.1:3080:3080"
+    volumes:
+        - ./freeirc/build:/usr/share/nginx/html
+        #- ./server/:/src/
+        - ./dns/freeirc.db/:/root/freeirc.db
+    dns:
+      - "192.168.0.53"
+    networks:
+        internal-net:
+            ipv4_address: "192.168.0.80"
+        outside:
+
+  freeirc-irc:
+    init: true
+    image: ghcr.io/ergochat/ergo:stable
+    ports:
+      - "127.0.0.1:6697:6697/tcp"
+    volumes:
+      - data:/ircd
+    dns:
+      - "192.168.0.53"
+    networks:
+      internal-net:
+        ipv4_address: "192.168.0.69"
+      outside:
+
+  probe-irc:
+    init: true
+    image: ghcr.io/ergochat/ergo:stable
+    ports:
+      - "127.0.0.1:6698:6697/tcp"
+    volumes:
+      - probe-irc:/ircd
+    dns:
+      - "192.168.0.53"
+    networks:
+      internal-net:
+        ipv4_address: "192.168.0.67"
+      outside:
+    
+  attack-box:
+      build: 
+          dockerfile: box.Dockerfile
+
+      stdin_open: true
+      tty: true
+      dns:
+      - "192.168.0.53"
+      networks:
+          internal-net:
+              aliases:
+                  - kali.pr0b3.com
+    
+volumes:
+  data:
+  probe-irc:
+
+networks:
+    internal-net:
+        driver: bridge
+        internal: true
+        ipam:
+          config:
+            - subnet: 192.168.0.0/24
+              gateway: 192.168.0.1
+
+    outside:
+        driver: bridge
+        driver_opts:
+            com.docker.network.bridge.enable_ip_masquerade: 'false'

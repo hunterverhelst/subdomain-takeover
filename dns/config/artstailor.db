@@ -1,0 +1,2 @@
+artstailor.com.        IN  SOA ns.artstailor.io. opp.artstailor.io. 2016082543 7200 3600 1209600 3600
+irc IN  CNAME  artstailor.freeirc.io.

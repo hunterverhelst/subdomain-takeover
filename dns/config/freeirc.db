@@ -1,0 +1,6 @@
+freeirc.io.        IN  SOA dns.freeirc.io. contact.freeirc.io. 2015082546 7200 3600 1209600 3600
+
+dns    IN  A   192.168.0.53
+www  IN  A   192.168.0.80
+pr0b3   IN  A   192.168.0.67
+artstailor  IN  A   192.168.0.67

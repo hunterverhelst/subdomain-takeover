@@ -1,0 +1,15 @@
+freeirc.io:53 {
+    file /root/freeirc.db {
+        reload "10s"
+    }
+    log
+    errors
+}
+
+artstailor.com:53 {
+    file /root/artstailor.db {
+        reload "10s"
+    }
+    log
+    errors
+}
