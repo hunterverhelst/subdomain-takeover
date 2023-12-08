@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken"
 import { Low } from 'lowdb'
 import { JSONFile } from 'lowdb/node'
 import lodash from 'lodash'
-import { createErgoServer, restartServer, startServer, stopServer, updateDNS } from './docker.js'
+import { updateDNS } from './docker.js'
 
 type User = {
   email: string
@@ -39,7 +39,8 @@ await db.read()
 const app = express()
 
 // Define a JWT secret key. This should be isolated by using env variables for security
-const jwtSecretKey = "dsfdsfsdfdsvcsvdfgefg"
+// Since this is designed to be run locally it doesn't matter too much in this context
+const jwtSecretKey = "opikajfjawefolhjad"
 
 // Set up CORS and JSON middlewares
 app.use(cors())
@@ -63,7 +64,7 @@ app.post("/api/auth", (req, res) => {
   if (user.length === 1) {
     bcrypt.compare(password, user[0].password, function (_err, result) {
       if (!result) {
-        return res.status(401).json({ message: "Invalid password" });
+        return res.status(401).json({ message: "Username or password is incorrect" });
       } else {
         let loginData = {
           email,
@@ -76,20 +77,21 @@ app.post("/api/auth", (req, res) => {
     });
     // If no user is found, hash the given password and create a new entry in the auth db with the email and hashed password
   } else if (user.length === 0) {
-    bcrypt.hash(password, 10, async function (_err, hash) {
-      console.log({ email, password: hash })
-      db.chain.get("users").push({ email, password: hash, prefix: email }).value()
-      await db.write()
+    // Removing ability to create account, see the 'docker.ts' file for more details
+    // bcrypt.hash(password, 10, async function (_err, hash) {
+    //   console.log({ email, password: hash })
+    //   db.chain.get("users").push({ email, password: hash, prefix: email }).value()
+    //   await db.write()
 
-      let loginData = {
-        email,
-        signInTime: Date.now(),
-      };
+    //   let loginData = {
+    //     email,
+    //     signInTime: Date.now(),
+    //   };
 
-      const token = jwt.sign(loginData, jwtSecretKey);
-      res.status(200).json({ message: "success", token });
-    });
-
+    //   const token = jwt.sign(loginData, jwtSecretKey);
+    //   res.status(200).json({ message: "success", token });
+    // });
+    res.status(401).json({ message: "Username or password is incorrect" })
   }
 
 
@@ -165,7 +167,7 @@ app.post('/api/domainprefix', (req, res) => {
     res.sendStatus(401);
     return
   }
-  if (req.body.prefix in ["dns", "www",]) {
+  if (req.body.prefix in ["dns", "www", "irc"]) {
     res.status(401).json({ message: "subdomain is either reserved or taken" })
   }
   const user = db.chain.get("users").value().filter(user => userData.email === user.email)[0]
@@ -190,19 +192,19 @@ app.post('/api/domainprefix', (req, res) => {
 //   res.sendStatus(200)
 // })
 
-app.post('/api/server/restart', (req, res) => {
-  const userData = checkToken(req)
-  if (userData === null) {
-    res.sendStatus(401);
-    return
-  }
+// app.post('/api/server/restart', (req, res) => {
+//   const userData = checkToken(req)
+//   if (userData === null) {
+//     res.sendStatus(401);
+//     return
+//   }
 
-  let simpleAccount = userData.email
-  simpleAccount.replace(/\W/g, '');
+//   let simpleAccount = userData.email
+//   simpleAccount.replace(/\W/g, '');
 
-  restartServer(simpleAccount);
-  res.sendStatus(200)
+//   restartServer(simpleAccount);
+//   res.sendStatus(200)
 
-})
+// })
 console.log("Listening on port 3080")
 app.listen(3080)

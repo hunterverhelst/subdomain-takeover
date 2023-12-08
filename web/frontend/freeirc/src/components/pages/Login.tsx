@@ -6,13 +6,17 @@ import Row from 'react-bootstrap/Row'
 import Container from 'react-bootstrap/Container'
 import InputGroup from 'react-bootstrap/InputGroup'
 import { useNavigate } from "react-router-dom";
+import Toast from 'react-bootstrap/Toast';
+import ToastContainer from 'react-bootstrap/ToastContainer';
+
+
 
 const Login = (props: any) => {
     const [username, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [emailError, setEmailError] = useState("")
     const [passwordError, setPasswordError] = useState("")
-
+    const [showLoginFail, setShowLoginFail] = useState(false)
     const navigate = useNavigate();
 
     const onButtonClick = (e: React.MouseEvent<HTMLFormElement, MouseEvent>) => {
@@ -22,26 +26,26 @@ const Login = (props: any) => {
         setEmailError("")
         setPasswordError("")
 
-        // Check if the user has entered both fields correctly
-        if ("" === username) {
-            setEmailError("Please enter your username")
-            return
-        }
+        // // Check if the user has entered both fields correctly
+        // if ("" === username) {
+        //     setEmailError("Please enter your username")
+        //     return
+        // }
 
-        if (!/.*/.test(username)) {
-            setEmailError("Please enter a valid email")
-            return
-        }
+        // if (!/.*/.test(username)) {
+        //     setEmailError("Please enter a valid email")
+        //     return
+        // }
 
-        if ("" === password) {
-            setPasswordError("Please enter a password")
-            return
-        }
+        // if ("" === password) {
+        //     setPasswordError("Please enter a password")
+        //     return
+        // }
 
-        if (password.length < 7) {
-            setPasswordError("The password must be 8 characters or longer")
-            return
-        }
+        // if (password.length < 7) {
+        //     setPasswordError("The password must be 8 characters or longer")
+        //     return
+        // }
 
         // Check if email has an account associated with it
         checkAccountExists((accountExists: boolean) => {
@@ -51,9 +55,7 @@ const Login = (props: any) => {
             }
             else
                 // Else, ask user if they want to create a new account and if yes, then log in
-                if (window.confirm("An account does not exist with this username: " + username + ". Do you want to create a new account?")) {
-                    logIn()
-                }
+                setShowLoginFail(true)
         })
 
     }
@@ -86,11 +88,12 @@ const Login = (props: any) => {
             .then(r => {
                 if ('success' === r.message) {
                     localStorage.setItem("user", JSON.stringify({ email: username, token: r.token }))
+                    props.setToken(r.token)
                     props.setLoggedIn(true)
                     props.setEmail(username)
                     navigate("/")
                 } else {
-                    window.alert("Wrong username or password")
+                    setShowLoginFail(true)
                 }
             })
     }
@@ -123,7 +126,14 @@ const Login = (props: any) => {
                         <Button type='submit' variant='primary'>Submit</Button>
                     </Form>
                 </Container>
-
+                <ToastContainer position="bottom-center">
+                    <Toast bg='danger' show={showLoginFail} onClose={_ => setShowLoginFail(false)} delay={3000} autohide >
+                        <Toast.Header>
+                            <strong className="me-auto">Error</strong>
+                        </Toast.Header>
+                        <Toast.Body>Username or Password is incorrect</Toast.Body>
+                    </Toast>
+                </ToastContainer>
             </div>
             {/* <div className={"titleContainer"}>
             <div>Login</div>

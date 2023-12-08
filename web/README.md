@@ -1,3 +1,19 @@
+# FreeIRC Website Front and Back End
+This site is a *heavily* modified version of the code from the tutorial below.
+
+Modifications include:
+- Slight UI improvement using react bootstrap
+- Migrate code from CommonJs to ESM
+- Convert code from JavaScript to TypeScript
+- Disable the ability for users to create accounts
+
+## Configuration
+If you want to change the password of the user, or create new users, you can edit the `server/db.json` file. The `password` field should be a bcrypt hash with 10 salt rounds. 
+
+https://clerk.com/blog/building-a-react-login-page-template
+https://github.com/krharsh17/react-login-demo/tree/basic-auth
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

@@ -1,9 +1,9 @@
 ; Zone: freeirc.io.
-; Exported  (yyyy-mm-ddThh:mm:ss.sssZ): 2023-12-05T07:19:55.966Z
+; Exported  (yyyy-mm-ddThh:mm:ss.sssZ): 2023-12-08T12:55:39.656Z
 
 ; SOA Record
 freeirc.io.	 		IN	SOA	dns.freeirc.io.	contact.freeirc.io.	(
-2023120561	 ;serial
+2023120839	 ;serial
 7200	 ;refresh
 3600	 ;retry
 1209600	 ;expire
@@ -17,12 +17,13 @@ freeirc.io.	 		IN	SOA	dns.freeirc.io.	contact.freeirc.io.	(
 ; A Records
 dns	IN	A	192.168.0.53
 irc	IN	A	192.168.0.69
-@ IN CNAME irc.freeirc.io.
-artstailor	IN	A	192.168.0.67
-* IN CNAME irc.freeirc.io.
+pr0b3	IN	A	192.168.0.67
+
 ; AAAA Records
 
 ; CNAME Records
+@	IN	CNAME	irc.freeirc.io.
+*	IN	CNAME	irc.freeirc.io.
 
 ; PTR Records
 
