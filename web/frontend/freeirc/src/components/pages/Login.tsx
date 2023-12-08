@@ -4,7 +4,6 @@ import Form from 'react-bootstrap/Form'
 import Col from 'react-bootstrap/Col';
 import Row from 'react-bootstrap/Row'
 import Container from 'react-bootstrap/Container'
-import InputGroup from 'react-bootstrap/InputGroup'
 import { useNavigate } from "react-router-dom";
 import Toast from 'react-bootstrap/Toast';
 import ToastContainer from 'react-bootstrap/ToastContainer';
@@ -14,38 +13,12 @@ import ToastContainer from 'react-bootstrap/ToastContainer';
 const Login = (props: any) => {
     const [username, setEmail] = useState("")
     const [password, setPassword] = useState("")
-    const [emailError, setEmailError] = useState("")
-    const [passwordError, setPasswordError] = useState("")
     const [showLoginFail, setShowLoginFail] = useState(false)
     const navigate = useNavigate();
 
     const onButtonClick = (e: React.MouseEvent<HTMLFormElement, MouseEvent>) => {
         e.preventDefault()
 
-        // Set initial error values to empty
-        setEmailError("")
-        setPasswordError("")
-
-        // // Check if the user has entered both fields correctly
-        // if ("" === username) {
-        //     setEmailError("Please enter your username")
-        //     return
-        // }
-
-        // if (!/.*/.test(username)) {
-        //     setEmailError("Please enter a valid email")
-        //     return
-        // }
-
-        // if ("" === password) {
-        //     setPasswordError("Please enter a password")
-        //     return
-        // }
-
-        // if (password.length < 7) {
-        //     setPasswordError("The password must be 8 characters or longer")
-        //     return
-        // }
 
         // Check if email has an account associated with it
         checkAccountExists((accountExists: boolean) => {
@@ -54,7 +27,7 @@ const Login = (props: any) => {
                 logIn()
             }
             else
-                // Else, ask user if they want to create a new account and if yes, then log in
+                // Else, display error
                 setShowLoginFail(true)
         })
 
@@ -135,35 +108,6 @@ const Login = (props: any) => {
                     </Toast>
                 </ToastContainer>
             </div>
-            {/* <div className={"titleContainer"}>
-            <div>Login</div>
-        </div>
-        <br />
-        <div className={"inputContainer"}>
-            <input
-                value={username}
-                placeholder="Enter your username here"
-                onChange={ev => setEmail(ev.target.value)}
-                className={"inputBox"} />
-            <label className="errorLabel">{emailError}</label>
-        </div>
-        <br />
-        <div className={"inputContainer"}>
-            <input
-                value={password}
-                placeholder="Enter your password here"
-                onChange={ev => setPassword(ev.target.value)}
-                className={"inputBox"} />
-            <label className="errorLabel">{passwordError}</label>
-        </div>
-        <br />
-        <div className={"inputContainer"}>
-            <input
-                className={"inputButton"}
-                type="button"
-                onClick={onButtonClick}
-                value={"Log in"} />
-        </div> */}
         </div>
     );
 }

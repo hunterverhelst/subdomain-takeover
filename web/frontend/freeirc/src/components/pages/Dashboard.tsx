@@ -5,10 +5,7 @@ import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form'
-import Col from 'react-bootstrap/Col';
-import Row from 'react-bootstrap/Row'
 import Container from 'react-bootstrap/Container'
-import { useNavigate } from "react-router-dom";
 import ChangeDomainToast from '../widgets/prefixUpdateToast';
 
 const Dashboard = (props: any) => {

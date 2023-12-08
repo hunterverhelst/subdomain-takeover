@@ -15,9 +15,7 @@ services:
 
   node-api:
     build: ./web/backend
-    #ports: #- "127.0.0.1:3080:3080"
     volumes:
-      # - ./dns/config/freeirc.db:/root/dns/freeirc.db
       - dns-config:/root/dns/:rw
     networks:
       - internal-net
@@ -28,10 +26,6 @@ services:
       - node-api
     ports:
       - "127.0.0.1:80:80"
-      #- "127.0.0.1:3080:3080"
-
-
-      #- ./server/:/src/
 
     dns:
       - "192.168.0.53"
@@ -44,8 +38,6 @@ services:
   freeirc-irc:
     init: true
     build: ergo-freeirc
-    ports:
-      - "127.0.0.1:6697:6697/tcp"
     dns:
       - "192.168.0.53"
     networks:

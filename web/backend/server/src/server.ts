@@ -30,11 +30,6 @@ const adapter = new JSONFile<Data>('db.json')
 const db = new LowWithLodash(adapter, defaultData)
 await db.read()
 
-// Instead of db.data use db.chain to access lodash API
-//const post = db.chain.get('posts').find({ id: 1 }).value() // Important: value() must be called to execute chain
-
-// const defaultData = { users: [] }
-// const db = await JSONPreset('db.json', defaultData)
 // Initialize Express app
 const app = express()
 
@@ -75,22 +70,8 @@ app.post("/api/auth", (req, res) => {
         res.status(200).json({ message: "success", token });
       }
     });
-    // If no user is found, hash the given password and create a new entry in the auth db with the email and hashed password
+    // If no user is found, send 401
   } else if (user.length === 0) {
-    // Removing ability to create account, see the 'docker.ts' file for more details
-    // bcrypt.hash(password, 10, async function (_err, hash) {
-    //   console.log({ email, password: hash })
-    //   db.chain.get("users").push({ email, password: hash, prefix: email }).value()
-    //   await db.write()
-
-    //   let loginData = {
-    //     email,
-    //     signInTime: Date.now(),
-    //   };
-
-    //   const token = jwt.sign(loginData, jwtSecretKey);
-    //   res.status(200).json({ message: "success", token });
-    // });
     res.status(401).json({ message: "Username or password is incorrect" })
   }
 
@@ -98,7 +79,6 @@ app.post("/api/auth", (req, res) => {
 })
 
 const checkToken = (req: any) => {
-  //console.log(req)
   const tokenHeaderKey = "jwt-token";
   const authToken = req.headers[tokenHeaderKey];
   try {
@@ -129,7 +109,6 @@ app.post('/api/verify', (req, res) => {
     }
   } catch (error) {
     // Access Denied
-    console.log(error)
     return res.status(401).json({ status: "invalid auth", message: "error" });
   }
 
@@ -139,18 +118,13 @@ app.post('/api/verify', (req, res) => {
 app.post('/api/check-account', (req, res) => {
   const { email } = req.body
 
-  console.log(req.body)
-
   const user = db.chain.get("users").value().filter(user => email === user.email)
-
-  console.log(user)
 
   res.status(200).json({
     status: user.length === 1 ? "User exists" : "User does not exist", userExists: user.length === 1
   })
 })
 app.get('/api/domainprefix', (req, res) => {
-  console.log("get prefix")
   const userData = checkToken(req);
   if (userData === null) {
     res.sendStatus(401);
@@ -158,7 +132,6 @@ app.get('/api/domainprefix', (req, res) => {
   }
 
   const user = db.chain.get("users").value().filter(user => userData.email === user.email)[0]
-  console.log(user)
   res.status(200).json({ prefix: user.prefix })
 })
 app.post('/api/domainprefix', (req, res) => {
@@ -178,33 +151,5 @@ app.post('/api/domainprefix', (req, res) => {
   res.sendStatus(201)
 })
 
-// app.post('/server/create', (req, res) => {
-//   const userData = checkToken(req)
-//   if (userData === null) {
-//     res.sendStatus(401);
-//     return
-//   }
-
-//   let simpleAccount = userData.email
-//   simpleAccount.replace(/\W/g, '');
-
-//   createErgoServer(simpleAccount);
-//   res.sendStatus(200)
-// })
-
-// app.post('/api/server/restart', (req, res) => {
-//   const userData = checkToken(req)
-//   if (userData === null) {
-//     res.sendStatus(401);
-//     return
-//   }
-
-//   let simpleAccount = userData.email
-//   simpleAccount.replace(/\W/g, '');
-
-//   restartServer(simpleAccount);
-//   res.sendStatus(200)
-
-// })
 console.log("Listening on port 3080")
 app.listen(3080)
