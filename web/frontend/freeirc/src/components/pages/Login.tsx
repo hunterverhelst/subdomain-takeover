@@ -7,6 +7,7 @@ import Container from 'react-bootstrap/Container'
 import { useNavigate } from "react-router-dom";
 import Toast from 'react-bootstrap/Toast';
 import ToastContainer from 'react-bootstrap/ToastContainer';
+import AutoDismissToast from "../widgets/AutoDismissToast";
 
 
 
@@ -99,14 +100,10 @@ const Login = (props: any) => {
                         <Button type='submit' variant='primary'>Submit</Button>
                     </Form>
                 </Container>
-                <ToastContainer position="bottom-center">
-                    <Toast bg='danger' show={showLoginFail} onClose={_ => setShowLoginFail(false)} delay={3000} autohide >
-                        <Toast.Header>
-                            <strong className="me-auto">Error</strong>
-                        </Toast.Header>
-                        <Toast.Body>Username or Password is incorrect</Toast.Body>
-                    </Toast>
-                </ToastContainer>
+
+                <AutoDismissToast bg="danger" show={showLoginFail} onClose={(_: any) => setShowLoginFail(false)} header="Error">
+                    Username or Password is incorrect
+                </AutoDismissToast>
             </div>
         </div>
     );
