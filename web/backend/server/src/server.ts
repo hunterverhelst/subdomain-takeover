@@ -124,6 +124,8 @@ app.post('/api/check-account', (req, res) => {
     status: user.length === 1 ? "User exists" : "User does not exist", userExists: user.length === 1
   })
 })
+
+// endpoint to get the current subdomain for the user
 app.get('/api/domainprefix', (req, res) => {
   const userData = checkToken(req);
   if (userData === null) {
@@ -134,21 +136,33 @@ app.get('/api/domainprefix', (req, res) => {
   const user = db.chain.get("users").value().filter(user => userData.email === user.email)[0]
   res.status(200).json({ prefix: user.prefix })
 })
+
+// endpoint to update the subdomain for the user
 app.post('/api/domainprefix', (req, res) => {
   const userData = checkToken(req);
   if (userData === null) {
     res.sendStatus(401);
     return
   }
-  if (req.body.prefix in ["dns", "www", "irc"]) {
-    res.status(401).json({ message: "subdomain is either reserved or taken" })
+  let newPrefix = req.body.prefix.replace(/[^a-zA-Z0-9]/g, '');
+  if (newPrefix in ["dns", "www", "irc"]) {
+    res.status(403).json({ message: "subdomain is either reserved or taken" })
+    return
   }
   const user = db.chain.get("users").value().filter(user => userData.email === user.email)[0]
   let oldPrefix = user.prefix
-  user.prefix = req.body.prefix
-  db.write()
-  updateDNS(oldPrefix, req.body.prefix)
-  res.sendStatus(201)
+
+  if (updateDNS(oldPrefix, newPrefix)) {
+    user.prefix = newPrefix
+    db.write()
+    res.sendStatus(201)
+  }
+  else {
+    res.status(403).json({ message: "user subdomain does not exist or is taken" })
+  }
+
+
+
 })
 
 console.log("Listening on port 3080")
