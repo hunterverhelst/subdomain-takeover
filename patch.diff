@@ -1,0 +1,146 @@
+diff --git a/dns/Dockerfile b/dns/Dockerfile
+index 896dcf4..8414d0c 100644
+--- a/dns/Dockerfile
++++ b/dns/Dockerfile
+@@ -1,3 +1,3 @@
+ FROM coredns/coredns
+ USER root
+-COPY ./config/* /root
+\ No newline at end of file
++COPY ./config/* /root/
+diff --git a/dns/config/artstailor.db b/dns/config/artstailor.db
+index ba7282b..ac41227 100644
+--- a/dns/config/artstailor.db
++++ b/dns/config/artstailor.db
+@@ -1,4 +1,4 @@
+ artstailor.com.        IN  SOA dns.freeirc.io. opp.artstailor.io. 2016082543 7200 3600 1209600 3600
+ 
+-ns IN   A   192.168.0.53
+-irc IN  CNAME  artstailor.freeirc.io.
+\ No newline at end of file
++ns IN   A   10.0.2.16
++irc IN  CNAME  artstailor.freeirc.io.
+diff --git a/dns/config/freeirc-com.db b/dns/config/freeirc-com.db
+index 29954a6..08c520b 100644
+--- a/dns/config/freeirc-com.db
++++ b/dns/config/freeirc-com.db
+@@ -1,4 +1,4 @@
+ freeirc.com.        IN  SOA dns.freeirc.io. contact.freeirc.io. 2018082543 7200 3600 1209600 3600
+ 
+-@   IN  A   192.168.0.80
+-www IN  CNAME   @
+\ No newline at end of file
++@   IN  A   10.0.2.16
++www IN  CNAME   @
+diff --git a/dns/config/freeirc.db b/dns/config/freeirc.db
+index 2e9b7d2..eeac05d 100644
+--- a/dns/config/freeirc.db
++++ b/dns/config/freeirc.db
+@@ -15,9 +15,9 @@ freeirc.io.	 		IN	SOA	dns.freeirc.io.	contact.freeirc.io.	(
+ ; MX Records
+ 
+ ; A Records
+-dns	IN	A	192.168.0.53
+-irc	IN	A	192.168.0.69
+-pr0b3	IN	A	192.168.0.67
++dns	IN	A	10.0.2.16
++irc	IN	A	10.0.2.16
++pr0b3	IN	A	10.0.2.17
+ 
+ ; AAAA Records
+ 
+diff --git a/docker-compose.yml b/docker-compose.yml
+index dcb8ed6..7dbf1a9 100644
+--- a/docker-compose.yml
++++ b/docker-compose.yml
+@@ -4,14 +4,13 @@ services:
+ 
+   dns:
+     build: ./dns
+-    # image: coredns/coredns
+     command: -conf /root/Corefile
++    ports:
++      - "53:53/udp"
+     volumes:
+-      # - ./dns/config/:/root
+       - dns-config:/root/:rw
+     networks:
+-      internal-net:
+-        ipv4_address: "192.168.0.53"
++      - outside
+ 
+   node-api:
+     build: ./web/backend
+@@ -25,53 +24,30 @@ services:
+     depends_on:
+       - node-api
+     ports:
+-      - "127.0.0.1:80:80"
++      - "80:80"
+ 
+-    dns:
+-      - "192.168.0.53"
+     networks:
+-      internal-net:
+-        ipv4_address: "192.168.0.80"
+-      outside:
+-
++      - outside
++      - internal-net
+ 
+   freeirc-irc:
+     init: true
+     build: ergo-freeirc
+-    dns:
+-      - "192.168.0.53"
++    ports:
++      - "10.0.2.16:6667:6667"
+     networks:
+-      internal-net:
+-        ipv4_address: "192.168.0.69"
+-      outside:
++      - outside
+ 
+ 
+   probe-irc:
+     init: true
+     build: ergo-hosted
+     ports:
+-      - "127.0.0.1:6698:6697/tcp"
+-    dns:
+-      - "192.168.0.53"
++      - "10.0.2.17:6667:6667/tcp"
+     networks:
+-      internal-net:
+-        ipv4_address: "192.168.0.67"
+-      outside:
++      - outside
+ 
+ 
+-  attack-box:
+-    build:
+-      dockerfile: box.Dockerfile
+-
+-    stdin_open: true
+-    tty: true
+-    dns:
+-      - "192.168.0.53"
+-    networks:
+-      internal-net:
+-        aliases:
+-          - kali.pr0b3.com
+-
+ volumes:
+   dns-config:
+ 
+@@ -80,10 +56,6 @@ networks:
+   internal-net:
+     driver: bridge
+     internal: true
+-    ipam:
+-      config:
+-        - subnet: 192.168.0.0/24
+-          gateway: 192.168.0.1
+ 
+   outside:
+     driver: bridge

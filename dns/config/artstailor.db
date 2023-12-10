@@ -1,4 +1,4 @@
 artstailor.com.        IN  SOA dns.freeirc.io. opp.artstailor.io. 2016082543 7200 3600 1209600 3600
 
-ns IN   A   192.168.0.53
+ns IN   A   10.0.2.16
 irc IN  CNAME  artstailor.freeirc.io.

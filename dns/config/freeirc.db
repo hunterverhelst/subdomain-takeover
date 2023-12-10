@@ -15,9 +15,9 @@ freeirc.io.	 		IN	SOA	dns.freeirc.io.	contact.freeirc.io.	(
 ; MX Records
 
 ; A Records
-dns	IN	A	192.168.0.53
-irc	IN	A	192.168.0.69
-pr0b3	IN	A	192.168.0.67
+dns	IN	A	10.0.2.16
+irc	IN	A	10.0.2.16
+pr0b3	IN	A	10.0.2.17
 
 ; AAAA Records
 

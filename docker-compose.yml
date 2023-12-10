@@ -4,14 +4,13 @@ services:
 
   dns:
     build: ./dns
-    # image: coredns/coredns
     command: -conf /root/Corefile
+    ports:
+      - "53:53/udp"
     volumes:
-      # - ./dns/config/:/root
       - dns-config:/root/:rw
     networks:
-      internal-net:
-        ipv4_address: "192.168.0.53"
+      - outside
 
   node-api:
     build: ./web/backend
@@ -25,52 +24,29 @@ services:
     depends_on:
       - node-api
     ports:
-      - "127.0.0.1:80:80"
+      - "80:80"
 
-    dns:
-      - "192.168.0.53"
     networks:
-      internal-net:
-        ipv4_address: "192.168.0.80"
-      outside:
-
+      - outside
+      - internal-net
 
   freeirc-irc:
     init: true
     build: ergo-freeirc
-    dns:
-      - "192.168.0.53"
+    ports:
+      - "10.0.2.16:6667:6667"
     networks:
-      internal-net:
-        ipv4_address: "192.168.0.69"
-      outside:
+      - outside
 
 
   probe-irc:
     init: true
     build: ergo-hosted
     ports:
-      - "127.0.0.1:6698:6697/tcp"
-    dns:
-      - "192.168.0.53"
+      - "10.0.2.17:6667:6667/tcp"
     networks:
-      internal-net:
-        ipv4_address: "192.168.0.67"
-      outside:
+      - outside
 
-
-  attack-box:
-    build:
-      dockerfile: box.Dockerfile
-
-    stdin_open: true
-    tty: true
-    dns:
-      - "192.168.0.53"
-    networks:
-      internal-net:
-        aliases:
-          - kali.pr0b3.com
 
 volumes:
   dns-config:
@@ -80,10 +56,6 @@ networks:
   internal-net:
     driver: bridge
     internal: true
-    ipam:
-      config:
-        - subnet: 192.168.0.0/24
-          gateway: 192.168.0.1
 
   outside:
     driver: bridge
