@@ -1,0 +1,91 @@
+version: "3.8"
+
+services:
+
+  dns:
+    build: ./dns
+    # image: coredns/coredns
+    command: -conf /root/Corefile
+    volumes:
+      # - ./dns/config/:/root
+      - dns-config:/root/:rw
+    networks:
+      internal-net:
+        ipv4_address: "192.168.0.53"
+
+  node-api:
+    build: ./web/backend
+    volumes:
+      - dns-config:/root/dns/:rw
+    networks:
+      - internal-net
+
+  freeirc-com:
+    build: ./web/frontend
+    depends_on:
+      - node-api
+    ports:
+      - "127.0.0.1:80:80"
+
+    dns:
+      - "192.168.0.53"
+    networks:
+      internal-net:
+        ipv4_address: "192.168.0.80"
+      outside:
+
+
+  freeirc-irc:
+    init: true
+    build: ergo-freeirc
+    dns:
+      - "192.168.0.53"
+    networks:
+      internal-net:
+        ipv4_address: "192.168.0.69"
+      outside:
+
+
+  probe-irc:
+    init: true
+    build: ergo-hosted
+    ports:
+      - "127.0.0.1:6698:6697/tcp"
+    dns:
+      - "192.168.0.53"
+    networks:
+      internal-net:
+        ipv4_address: "192.168.0.67"
+      outside:
+
+
+  attack-box:
+    build:
+      dockerfile: box.Dockerfile
+
+    stdin_open: true
+    tty: true
+    dns:
+      - "192.168.0.53"
+    networks:
+      internal-net:
+        aliases:
+          - kali.pr0b3.com
+
+volumes:
+  dns-config:
+
+
+networks:
+  internal-net:
+    driver: bridge
+    internal: true
+    ipam:
+      config:
+        - subnet: 192.168.0.0/24
+          gateway: 192.168.0.1
+
+  outside:
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.enable_ip_masquerade: 'false'
